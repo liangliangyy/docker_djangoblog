@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  db:
+    build: ./db/
+    #image: mysql
+    user: '1000:50'
+    env_file:
+      - ".env"
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_DATABASE=DjangoBlog
+      - MYSQL_USER=djangoblog
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - ./db/mysql/:/var/lib/mysql
+    depends_on:
+      - memcached
+    container_name: db
+  web:
+    build: ./web
+    restart: always
+    command:  bash -c  'cd DjangoBlog && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000'
+    volumes:
+      - ./web/codes:/code
+    ports:
+      - "8000:8000"
+    links:
+      - db
+    depends_on:
+      - db
+    container_name: web
+
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    volumes_from:
+      - web
+    links:
+      - web:web
+    container_name: nginx
+  memcached:
+    build: ./memcached/
+    container_name: memcached
