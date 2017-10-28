@@ -1,0 +1,3 @@
+web/codes/DjangoBlog
+!web/codes/DjangoBlog/bin/docker_start.sh
+db/mysql
